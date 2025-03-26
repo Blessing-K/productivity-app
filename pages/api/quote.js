@@ -1,21 +1,25 @@
 export default async function handler(req, res) {
     try {
-      const response = await fetch("https://pquotes.p.rapidapi.com/api/quote", {
-        method: "POST",
+      const response = await fetch("https://the-personal-quotes.p.rapidapi.com/quotes/tags/happiness", {
+        method: "GET", // ✅ Must be GET
         headers: {
-          "Content-Type": "application/json",
-          "x-rapidapi-host": "pquotes.p.rapidapi.com",
-          "x-rapidapi-key": "cf9c490946msh2e58cbc68c2cd7ap1f2510jsnb70f75b0f400"
-        },
-        body: JSON.stringify({ topic: "fun" })
+          "x-rapidapi-host": "the-personal-quotes.p.rapidapi.com",
+          "x-rapidapi-key": process.env.RAPIDAPI_KEY // ✅ Optional: hide key in .env
+        }
       });
   
       const data = await response.json();
-      res.status(200).json(data);
+      console.log("📦 API Response:", data);
+  
+      if (Array.isArray(data) && data.length > 0) {
+        const random = data[Math.floor(Math.random() * data.length)];
+        res.status(200).json({ quote: random.quote });
+      } else {
+        res.status(200).json({ quote: "No quotes available." });
+      }
     } catch (error) {
       console.error("❌ Error fetching quote:", error);
       res.status(500).json({ message: "Failed to fetch quote" });
     }
   }
-  
   
