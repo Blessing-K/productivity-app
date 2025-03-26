@@ -1,10 +1,10 @@
 export default async function handler(req, res) {
     try {
       const response = await fetch("https://the-personal-quotes.p.rapidapi.com/quotes/tags/happiness", {
-        method: "GET", // ✅ Must be GET
+        method: "GET", 
         headers: {
           "x-rapidapi-host": "the-personal-quotes.p.rapidapi.com",
-          "x-rapidapi-key": process.env.RAPIDAPI_KEY // ✅ Optional: hide key in .env
+          "x-rapidapi-key": process.env.RAPIDAPI_KEY 
         }
       });
   
@@ -21,5 +21,5 @@ export default async function handler(req, res) {
       console.error("❌ Error fetching quote:", error);
       res.status(500).json({ message: "Failed to fetch quote" });
     }
-  }
+}
   
