@@ -1,82 +1,149 @@
-"use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import style from "./login.module.css";
 
-const Signup = () => {
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState(null);
-    const router = useRouter();
+export default function SignUp() {
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [termsConditions, setTermsConditions] = useState(false);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault(); // Prevent page reload
+  const [usernameError, setUsernameError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [termsConditionsError, setTermsConditionsError] = useState("");
 
-        try {
-            const response = await fetch("/api/signup", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ firstName, lastName, email, password }),
-            });
+  function handleSubmit(e) {
+    e.preventDefault();
+    let hasErrors = false;
 
-            const data = await response.json();
+    if (username.trim() === "" || username.trim().toLowerCase() === "username" || username.length < 5) {
+      setUsernameError("Please enter a valid Username");
+      hasErrors = true;
+    } else {
+      setUsernameError("");
+    }
 
-            if (!response.ok) {
-                throw new Error(data.error || "Signup failed");
-            }
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setEmailError("Please enter a valid Email");
+      hasErrors = true;
+    } else {
+      setEmailError("");
+    }
 
-            alert("Signup successful!");
-            router.push('/')
-        } catch (err) {
-            setError(err.message);
-        }
-    };
+    if (password.trim().length < 6) {
+      setPasswordError("Password must be at least 6 characters long");
+      hasErrors = true;
+    } else {
+      setPasswordError("");
+    }
 
-    return (
-        <div>
-            <h1>Sign Up</h1>
-            {error && <p style={{ color: "red" }}>{error}</p>}
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="text"
-                    placeholder="First Name"
-                    name="firstName"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    required
-                />
-                <input
-                    type="text"
-                    placeholder="Last Name"
-                    name="lastName"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    required
-                />
-                <input
-                    type="email"
-                    placeholder="Email"
-                    name="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    name="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-                <button type="submit">Sign Up</button>
-            </form>
-        </div>
-    );
-};
+    if (!termsConditions) {
+      setTermsConditionsError("You must accept the terms and conditions");
+      hasErrors = true;
+    } else {
+      setTermsConditionsError("");
+    }
 
-export default Signup;
+    if (!hasErrors) {
+      alert("Form submitted successfully!");
+      DeleteFields();
+    }
+  }
+
+  function DeleteFields() {
+    setUsername("");
+    setEmail("");
+    setPassword("");
+    setTermsConditions(false);
+    setUsernameError("");
+    setEmailError("");
+    setPasswordError("");
+    setTermsConditionsError("");
+  }
+
+  return (
+    <section className={style.login_body}>
+      <div className={style.login_form}>
+        <form className={style.form} onSubmit={handleSubmit}>
+        <h1>Task manager</h1>
+          <h1>Welcome!</h1>
+          <h2>Please enter your details</h2>
+          <div className={style.form_username}>
+            <input
+              className={style.form_input}
+              type="text"
+              value={username}
+              onChange={(e) => {
+                setUsername(e.target.value);
+                setUsernameError("");
+              }}
+              placeholder="Enter your username"
+            />
+            <br/>
+            {usernameError && <span className={style.login_span}>{usernameError}</span>}
+          </div>
+
+          <div className={style.form_email}>
+            <input
+              className={style.form_input}
+              type="text"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setEmailError("");
+              }}
+              placeholder="Enter your email"
+            />
+            <br/>
+            {emailError && <span className={style.login_span}>{emailError}</span>}
+          </div>
+
+          <div className={style.form_password}>
+            <input
+              className={style.form_input}
+              type="password"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setPasswordError("");
+              }}
+              placeholder="Enter your password"
+            />
+            <br/>
+            {passwordError && <span className={style.login_span}>{passwordError}</span>}
+          </div>
+
+          <div className={style.form_terms}>
+            <label>
+              <input
+                type="checkbox"
+                checked={termsConditions}
+                onChange={(e) => {
+                  setTermsConditions(e.target.checked);
+                  setTermsConditionsError("");
+                }}
+              />
+              Accept our terms and conditions
+            </label>
+            <br/>
+            {termsConditionsError && <span className={style.login_span}>{termsConditionsError}</span>}
+          </div>
+          <div className={style.buttons_login}>
+          <button className={style.submit_button} type="submit">
+            Submit
+          </button>
+
+          <button className={style.delete_button} type="button" onClick={DeleteFields}>
+            Delete
+          </button>
+          </div>
+
+        </form>
+      </div>
+      <div className={style.login_image}>
+        <img src="/images/login_image.jpeg" alt="Login Image" />
+      </div>
+    </section>
+  );
+}
