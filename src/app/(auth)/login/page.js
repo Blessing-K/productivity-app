@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -10,12 +10,30 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  useEffect(() => {
+    const checkToken = async () => {
+      try {
+        const res = await fetch("/api/login");
+        const data = await res.json();
+        if (data.token) {
+          router.push("/"); // Redirect to main page if token exists
+        }
+      } catch (err) {
+        console.error("Error checking token:", err);
+      }
+    };
+
+    checkToken();
+  }, [router]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
     try {
+      // Check if there is a cookie
+      
       const response = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
