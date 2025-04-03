@@ -1,11 +1,40 @@
 import jwt from "jsonwebtoken"
 import bcrypt from 'bcryptjs'
-import validator from 'validator';
 import { cookies } from 'next/headers';
+import { PrismaClient } from '@prisma/client'
 
+// Initiazlie Prisma Client
 const prisma = new PrismaClient()
 
-export async function POST() {
+
+// const verifyUser = async (email, password) =>{
+//     const user = await prisma.user.findUnique({
+//         where: {
+//             email: email,
+//         }
+//     })
+//     // Check if user exists
+//     if(!user){
+//         console.log("Invaid email")
+//         return new Response(JSON.stringify({ error: "Invliad email" }), {
+//             status: 500,
+//             headers: { "Content-Type": "application/json" },
+//         });
+//     }
+
+//     const isValid = await bcrypt.compare(password, user.passwordHash)
+//     console.log(isValid)
+//     // Validate here
+//     if (!isValid) {
+//         return new Response(JSON.stringify({ error: "Email and password doesn't match" }), {
+//             status: 500,
+//             headers: { "Content-Type": "application/json" },
+//         });
+//     }
+// }
+
+
+export async function POST(request) {
 
     try {
         const body = await request.json()
@@ -17,29 +46,37 @@ export async function POST() {
                 email: email,
             }
         })
+        // Check if user exists
+        if(!user){
+            console.log("Invalid email")
+            return new Response(JSON.stringify({ error: "Invalid email" }), {
+                status: 500,
+                headers: { "Content-Type": "application/json" },
+            });
+        }
+
         const isValid = await bcrypt.compare(password, user.passwordHash)
         console.log(isValid)
-        
         // Validate here
         if (!isValid) {
-            throw createError({
-                statusCode: 401,
-                message: 'Invalid email or password',
-            })
+            return new Response(JSON.stringify({ error: "Email and password doesn't match" }), {
+                status: 500,
+                headers: { "Content-Type": "application/json" },
+            });
         }
         const token = jwt.sign(
             { id: user.id }, process.env.JWT_SECRET,
         );
 
         const cookieStore = await cookies()
-        cookieStore.set('were-wolfJWT', token, {
+        cookieStore.set('productivity-app', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            // secure: process.env.NODE_ENV === 'production',
             maxAge: 60 * 60 * 24, // 1 day
         });
         
         const response = {
-            message: "Logged in  succesfullly"
+            message: "Logged in succesfullly"
         }
 
         console.log(token)
@@ -50,12 +87,5 @@ export async function POST() {
     }
     catch (error) {
         console.log(error)
-        if (error.code === 'P2002') {
-            throw createError({
-                statusCode: 409,
-                statusMessage: 'An email with this address already exists',
-            })
-        }
-        throw error
     }
 }
