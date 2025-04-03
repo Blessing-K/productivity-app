@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react";
-// import style from "./login.module.css";
+ import style from "./signup.module.css";
 
 export default function SignUp() {
   const [username, setUsername] = useState("");
