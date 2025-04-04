@@ -6,34 +6,6 @@ import { PrismaClient } from '@prisma/client'
 // Initiazlie Prisma Client
 const prisma = new PrismaClient()
 
-
-// const verifyUser = async (email, password) =>{
-//     const user = await prisma.user.findUnique({
-//         where: {
-//             email: email,
-//         }
-//     })
-//     // Check if user exists
-//     if(!user){
-//         console.log("Invaid email")
-//         return new Response(JSON.stringify({ error: "Invliad email" }), {
-//             status: 500,
-//             headers: { "Content-Type": "application/json" },
-//         });
-//     }
-
-//     const isValid = await bcrypt.compare(password, user.passwordHash)
-//     console.log(isValid)
-//     // Validate here
-//     if (!isValid) {
-//         return new Response(JSON.stringify({ error: "Email and password doesn't match" }), {
-//             status: 500,
-//             headers: { "Content-Type": "application/json" },
-//         });
-//     }
-// }
-
-
 export async function POST(request) {
 
     try {

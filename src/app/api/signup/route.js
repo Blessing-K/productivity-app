@@ -62,7 +62,7 @@ export async function POST(request) {
         });
 
         // Generate JWT token
-        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET);
 
         // Set token in cookies
         const cookieStore = await cookies()
