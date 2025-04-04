@@ -3,15 +3,6 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 ## Getting Started
 First run npm install to acquire all of the dependencies
 
+Create a .env file under the src folder
 
-## Setting up Prisma client
-
-npm install prisma --save-dev
-
-npx prisma
-
-npx prisma init
-
-Add to your .env file
-
-npx prisma db pull
+Copy and paste the content in google docs inside the .env file
