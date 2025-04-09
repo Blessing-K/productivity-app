@@ -1,97 +1,134 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import TaskCard from "@/src/components/TaskCard"; 
+import { useState } from "react";
+import GoalCard from "@/src/components/GoalCard";
 
 export default function TasksPage() {
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState([
+    {
+      id: 1,
+      name: "Practice React",
+      completed: true,
+      dueDate: "Today",
+      priority: "High",
+    },
+    {
+      id: 2,
+      name: "Build Java app",
+      completed: false,
+      dueDate: "Friday",
+      priority: "Medium",
+    },
+    {
+      id: 3,
+      name: "Revise Python",
+      completed: false,
+      dueDate: "",
+      priority: "Low",
+    },
+  ]);
+
   const [newTask, setNewTask] = useState("");
-  const [filter, setFilter] = useState("all");
+  const [dueDate, setDueDate] = useState("");
+  const [priority, setPriority] = useState("Low");
+  const [filter, setFilter] = useState("All");
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      window.location.href = "/login";
-    }
-  }, []);
-
-  const addTask = () => {
-    if (newTask.trim() === "") return;
+  const handleAddTask = () => {
+    if (!newTask.trim()) return;
     const newTaskObj = {
       id: Date.now(),
       name: newTask,
-      completed: false
+      completed: false,
+      dueDate,
+      priority,
     };
     setTasks([newTaskObj, ...tasks]);
     setNewTask("");
+    setDueDate("");
+    setPriority("Low");
   };
 
-  const toggleComplete = (id) => {
-    setTasks(tasks.map(t =>
-      t.id === id ? { ...t, completed: !t.completed } : t
-    ));
-  };
-
-  const deleteTask = (id) => {
-    setTasks(tasks.filter(t => t.id !== id));
-  };
-
-  const filteredTasks = tasks.filter(task => {
-    if (filter === "completed") return task.completed;
-    if (filter === "pending") return !task.completed;
-    return true;
+  const filteredTasks = tasks.filter((task) => {
+    if (filter === "All") return true;
+    if (filter === "Pending") return !task.completed;
+    if (filter === "Completed") return task.completed;
   });
 
   return (
     <div style={{ padding: "2rem", maxWidth: "600px", margin: "0 auto" }}>
-      <h1>📝 Task Manager</h1>
+      <h1>📝 Manage Your Tasks</h1>
 
-      {/* Add Task Form */}
-      <div style={{ marginBottom: "1rem" }}>
+      {/* Add New Task Form */}
+      <div style={{ margin: "1.5rem 0" }}>
         <input
           type="text"
           value={newTask}
           onChange={(e) => setNewTask(e.target.value)}
           placeholder="Enter new task"
-          style={{
-            padding: "0.5rem",
-            width: "70%",
-            borderRadius: "4px",
-            border: "1px solid #ccc"
-          }}
+          style={{ padding: "0.5rem", width: "100%", marginBottom: "0.5rem" }}
         />
-        <button
-          onClick={addTask}
-          style={{
-            marginLeft: "0.5rem",
-            padding: "0.5rem 1rem",
-            backgroundColor: "#28a745",
-            color: "white",
-            border: "none",
-            borderRadius: "4px"
-          }}
+        <input
+          type="date"
+          value={dueDate}
+          onChange={(e) => setDueDate(e.target.value)}
+          style={{ padding: "0.5rem", marginBottom: "0.5rem", width: "100%" }}
+        />
+        <select
+          value={priority}
+          onChange={(e) => setPriority(e.target.value)}
+          style={{ padding: "0.5rem", marginBottom: "0.5rem", width: "100%" }}
         >
-          Add
+          <option value="Low">Low</option>
+          <option value="Medium">Medium</option>
+          <option value="High">High ⚠️</option>
+        </select>
+        <button
+          onClick={handleAddTask}
+          style={{ padding: "0.5rem 1rem", display: "block", width: "100%" }}
+        >
+          Save
         </button>
       </div>
 
       {/* Filter Buttons */}
       <div style={{ marginBottom: "1rem" }}>
-        <button onClick={() => setFilter("all")} disabled={filter === "all"}>All</button>{" "}
-        <button onClick={() => setFilter("pending")} disabled={filter === "pending"}>Pending</button>{" "}
-        <button onClick={() => setFilter("completed")} disabled={filter === "completed"}>Completed</button>
+        <span role="img" aria-label="chart">📊</span> Filter Tasks: {" "}
+        {["All", "Pending", "Completed"].map((status) => (
+          <button
+            key={status}
+            onClick={() => setFilter(status)}
+            style={{
+              margin: "0 0.5rem",
+              padding: "0.3rem 0.6rem",
+              backgroundColor: filter === status ? "#0070f3" : "#eee",
+              color: filter === status ? "#fff" : "#333",
+              border: "none",
+              borderRadius: "4px",
+            }}
+          >
+            {status}
+          </button>
+        ))}
       </div>
 
       {/* Task List */}
-      {filteredTasks.length === 0 && <p>No tasks to show.</p>}
-      {filteredTasks.map((task) => (
-        <TaskCard
-          key={task.id}
-          task={task}
-          onToggle={toggleComplete}
-          onDelete={deleteTask}
-        />
-      ))}
+      <div>
+        {filteredTasks.map((task) => (
+          <GoalCard
+            key={task.id}
+            task={task}
+            onToggle={() =>
+              setTasks(
+                tasks.map((t) =>
+                  t.id === task.id ? { ...t, completed: !t.completed } : t
+                )
+              )
+            }
+            onEdit={() => alert("Edit coming soon")}
+            onDelete={() => setTasks(tasks.filter((t) => t.id !== task.id))}
+          />
+        ))}
+      </div>
     </div>
   );
 }
