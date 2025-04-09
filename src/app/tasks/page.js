@@ -1,40 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import GoalCard from "@/src/components/GoalCard";
 
 export default function TasksPage() {
-  const [tasks, setTasks] = useState([
-    {
-      id: 1,
-      name: "Practice React",
-      completed: true,
-      dueDate: "Today",
-      priority: "High",
-    },
-    {
-      id: 2,
-      name: "Build Java app",
-      completed: false,
-      dueDate: "Friday",
-      priority: "Medium",
-    },
-    {
-      id: 3,
-      name: "Revise Python",
-      completed: false,
-      dueDate: "",
-      priority: "Low",
-    },
-  ]);
-
+  const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [priority, setPriority] = useState("Low");
   const [filter, setFilter] = useState("All");
 
-  const handleAddTask = () => {
+  useEffect(() => {
+    const loadTasks = () => {
+      const stored = localStorage.getItem("tasks");
+      if (stored) setTasks(JSON.parse(stored));
+    };
+
+    loadTasks();
+    document.addEventListener("visibilitychange", loadTasks);
+
+    return () => {
+      document.removeEventListener("visibilitychange", loadTasks);
+    };
+  }, []);
+
+  const syncTasks = (updatedTasks) => {
+    setTasks(updatedTasks);
+    localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+  };
+
+  const addTask = () => {
     if (!newTask.trim()) return;
+    const stored = localStorage.getItem("tasks");
+    const currentTasks = stored ? JSON.parse(stored) : [];
     const newTaskObj = {
       id: Date.now(),
       name: newTask,
@@ -42,10 +40,27 @@ export default function TasksPage() {
       dueDate,
       priority,
     };
-    setTasks([newTaskObj, ...tasks]);
+    const updatedTasks = [...currentTasks, newTaskObj];
+    syncTasks(updatedTasks);
     setNewTask("");
     setDueDate("");
     setPriority("Low");
+  };
+
+  const toggleTask = (id) => {
+    const stored = localStorage.getItem("tasks");
+    const currentTasks = stored ? JSON.parse(stored) : tasks;
+    const updatedTasks = currentTasks.map((task) =>
+      task.id === id ? { ...task, completed: !task.completed } : task
+    );
+    syncTasks(updatedTasks);
+  };
+
+  const deleteTask = (id) => {
+    const stored = localStorage.getItem("tasks");
+    const currentTasks = stored ? JSON.parse(stored) : tasks;
+    const updatedTasks = currentTasks.filter((task) => task.id !== id);
+    syncTasks(updatedTasks);
   };
 
   const filteredTasks = tasks.filter((task) => {
@@ -58,7 +73,6 @@ export default function TasksPage() {
     <div style={{ padding: "2rem", maxWidth: "600px", margin: "0 auto" }}>
       <h1>📝 Manage Your Tasks</h1>
 
-      {/* Add New Task Form */}
       <div style={{ margin: "1.5rem 0" }}>
         <input
           type="text"
@@ -83,14 +97,13 @@ export default function TasksPage() {
           <option value="High">High ⚠️</option>
         </select>
         <button
-          onClick={handleAddTask}
+          onClick={addTask}
           style={{ padding: "0.5rem 1rem", display: "block", width: "100%" }}
         >
           Save
         </button>
       </div>
 
-      {/* Filter Buttons */}
       <div style={{ marginBottom: "1rem" }}>
         <span role="img" aria-label="chart">📊</span> Filter Tasks: {" "}
         {["All", "Pending", "Completed"].map((status) => (
@@ -111,21 +124,14 @@ export default function TasksPage() {
         ))}
       </div>
 
-      {/* Task List */}
       <div>
         {filteredTasks.map((task) => (
           <GoalCard
             key={task.id}
             task={task}
-            onToggle={() =>
-              setTasks(
-                tasks.map((t) =>
-                  t.id === task.id ? { ...t, completed: !t.completed } : t
-                )
-              )
-            }
+            onToggle={() => toggleTask(task.id)}
             onEdit={() => alert("Edit coming soon")}
-            onDelete={() => setTasks(tasks.filter((t) => t.id !== task.id))}
+            onDelete={() => deleteTask(task.id)}
           />
         ))}
       </div>

@@ -1,41 +1,62 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import QuoteBanner from "@/src/components/QuoteBanner";
 
 export default function Home() {
-  const [tasks, setTasks] = useState([
-    { id: 1, name: "Finish project proposal", completed: true },
-    { id: 2, name: "Study for midterm", completed: false },
-    { id: 3, name: "Review design wireframe", completed: false }
-  ]);
+  const [tasks, setTasks] = useState([]);
+  const [newTask, setNewTask] = useState("");
+
+  useEffect(() => {
+    const loadTasks = () => {
+      const stored = localStorage.getItem("tasks");
+      if (stored) setTasks(JSON.parse(stored));
+    };
+
+    loadTasks();
+    document.addEventListener("visibilitychange", loadTasks);
+
+    return () => {
+      document.removeEventListener("visibilitychange", loadTasks);
+    };
+  }, []);
+
+  const syncTasks = (updatedTasks) => {
+    setTasks(updatedTasks);
+    localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+  };
+
+  const addTask = () => {
+    if (!newTask.trim()) return;
+    const stored = localStorage.getItem("tasks");
+    const currentTasks = stored ? JSON.parse(stored) : [];
+    const newTaskObj = {
+      id: Date.now(),
+      name: newTask,
+      completed: false,
+    };
+    const updatedTasks = [...currentTasks, newTaskObj];
+    syncTasks(updatedTasks);
+    setNewTask("");
+  };
+
+  const toggleTask = (id) => {
+    const stored = localStorage.getItem("tasks");
+    const currentTasks = stored ? JSON.parse(stored) : tasks;
+    const updatedTasks = currentTasks.map((task) =>
+      task.id === id ? { ...task, completed: !task.completed } : task
+    );
+    syncTasks(updatedTasks);
+  };
 
   const completedTasks = tasks.filter((task) => task.completed).length;
   const totalTasks = tasks.length;
   const completionRate =
     totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
-  const [newTask, setNewTask] = useState("");
-  const addTask = () => {
-    if (newTask.trim() !== "") {
-      const newTaskObj = {
-        id: tasks.length + 1,
-        name: newTask,
-        completed: false
-      };
-      setTasks([...tasks, newTaskObj]);
-      setNewTask("");
-    }
-  };
-
   return (
     <div
-      style={{
-        textAlign: "center",
-        padding: "2rem",
-        maxWidth: "600px",
-        margin: "0 auto"
-      }}
+      style={{ textAlign: "center", padding: "2rem", maxWidth: "600px", margin: "0 auto" }}
     >
       <h1>Hello, [User]!</h1>
 
@@ -49,18 +70,12 @@ export default function Home() {
               <input
                 type="checkbox"
                 checked={task.completed}
-                onChange={() =>
-                  setTasks(
-                    tasks.map((t) =>
-                      t.id === task.id ? { ...t, completed: !t.completed } : t
-                    )
-                  )
-                }
+                onChange={() => toggleTask(task.id)}
               />
               <span
                 style={{
                   marginLeft: "0.5rem",
-                  textDecoration: task.completed ? "line-through" : "none"
+                  textDecoration: task.completed ? "line-through" : "none",
                 }}
               >
                 {task.name}
@@ -79,7 +94,7 @@ export default function Home() {
               padding: "0.5rem",
               width: "70%",
               borderRadius: "4px",
-              border: "1px solid #ccc"
+              border: "1px solid #ccc",
             }}
           />
           <button
@@ -91,7 +106,7 @@ export default function Home() {
               color: "white",
               border: "none",
               borderRadius: "4px",
-              cursor: "pointer"
+              cursor: "pointer",
             }}
           >
             Add Task
@@ -104,7 +119,7 @@ export default function Home() {
           marginTop: "2rem",
           padding: "1rem",
           background: "#f5f5f5",
-          borderRadius: "8px"
+          borderRadius: "8px",
         }}
       >
         <h3>📊 Progress Summary</h3>
