@@ -142,8 +142,8 @@ export default function SignUp() {
 
         </form>
       </div>
-      <div className={style.login_image}>
-        <img src="/images/login_image.jpeg" alt="Login Image" />
+      <div className={style.login_image_container}>
+        <img className={style.login_image}src="/images/login_image.jpeg" alt="Login Image" />
       </div>
     </section>
   );

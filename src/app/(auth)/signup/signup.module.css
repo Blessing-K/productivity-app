@@ -11,12 +11,15 @@
     justify-content: center;
     width: 50%;
 }
-.login_image{
+.login_image_container{
     width: 50%;
     background-color: rgb(255, 255, 255);
     display: flex;
     align-items: center;
     justify-content: center;
+}
+.login_image{
+    width: 100%;
 }
 .form{
     width: auto;
