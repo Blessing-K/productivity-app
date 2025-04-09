@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-// Helper to get the secret key for jose
 function getSecretKey() {
   return new TextEncoder().encode(process.env.JWT_SECRET);
 }
 
-// Define public paths that don't require authentication
+// Routes that do not require authentication
 const PUBLIC_PATHS = ["/login", "/register", "/api"];
 
 export async function middleware(request) {
@@ -16,27 +15,29 @@ export async function middleware(request) {
   const isPublic = PUBLIC_PATHS.some((path) => pathname.startsWith(path));
   const isLogin = pathname === "/login";
 
-  // Logged in & accessing /login → redirect to home
+  // ✅ Redirect logged-in users away from login page
   if (token && isLogin) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // Not logged in & trying to access protected route → redirect to login
+  // ✅ If no token and route is not public → redirect to login
   if (!token && !isPublic) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // Token exists → verify with jose
+  // ✅ If token exists → verify it
   if (token) {
     try {
       await jwtVerify(token, getSecretKey());
-      // You can access decoded payload if needed: const { payload } = await jwtVerify(...)
     } catch (err) {
       console.error("Invalid or expired token:", err);
       return NextResponse.redirect(new URL("/login", request.url));
     }
   }
 
-  // Allow request to proceed
   return NextResponse.next();
 }
+
+export const config = {
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"], // applies to everything except static files
+};
