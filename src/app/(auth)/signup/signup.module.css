@@ -1,60 +1,128 @@
-.login_body{
+/* signup.module.css */
+
+.signup_body {
     background-color: rgb(238, 235, 243);
     width: 100%;
     height: 100vh;
     display: flex;
-}
-.login_form{
+  }
+  
+  .signup_form {
     background-color: rgb(228, 228, 228);
     display: flex;
     align-items: center;
     justify-content: center;
     width: 50%;
-}
-.login_image_container{
+    padding: 2rem;
+  }
+  
+  .signup_image_container {
     width: 50%;
     background-color: rgb(255, 255, 255);
     display: flex;
     align-items: center;
     justify-content: center;
-}
-.login_image{
+    overflow: hidden;
+  }
+  
+  .signup_image {
     width: 100%;
-}
-.form{
-    width: auto;
-    height: auto;
+    object-fit: cover;
+  }
+  
+  .form {
+    width: 100%;
+    max-width: 400px;
     display: flex;
     flex-direction: column;
-}
-
-.form_username, .form_email, .form_password, .form_terms{
-    padding: 15px 0px;
-}
-.form_input{
+    gap: 1rem;
+  }
+  
+  .form_group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .form_input {
     width: 100%;
-    border: solid rgb(151, 150, 155);
-    border-radius: 2px;
-    padding: 5px 10px;
+    border: 1px solid rgb(151, 150, 155);
+    border-radius: 4px;
+    padding: 10px 15px;
     font-size: 15px;
-}
-.form_terms{
+    transition: border-color 0.3s ease;
+  }
+  
+  .form_input:focus {
+    outline: none;
+    border-color: rgb(194, 167, 248);
+  }
+  
+  .form_terms {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     font-size: 15px;
-}
-.login_span{
+    margin: 1rem 0;
+  }
+  
+  .terms_label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+  }
+  
+  .terms_checkbox {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+  
+  .error_message {
     color: rgb(251, 70, 70);
     font-size: 12px;
-}
-.buttons_login{
+    margin-top: 0.25rem;
+  }
+  
+  .form_buttons {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 10px;
-}
-.submit_button, .delete_button {
+    margin-top: 1rem;
+  }
+  
+  .submit_button, .reset_button {
     color: white;
     background-color: rgb(194, 167, 248);
-    border-radius: 2px;
-    height: 30px;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 0;
     width: 50%;
-}
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .submit_button:hover, .reset_button:hover {
+    background-color: rgb(180, 150, 240);
+  }
+  
+  .form h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: rgb(70, 70, 70);
+  }
+  
+  .form h2 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: rgb(90, 90, 90);
+  }
+  
+  .form p {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    color: rgb(110, 110, 110);
+  }

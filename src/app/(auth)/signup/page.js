@@ -1,106 +1,160 @@
 "use client"
 
 import { useState } from "react";
- import style from "./signup.module.css";
+import style from "./signup.module.css";
 
 export default function SignUp() {
-  const [username, setUsername] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [termsConditions, setTermsConditions] = useState(false);
 
-  const [usernameError, setUsernameError] = useState("");
+  const [firstNameError, setFirstNameError] = useState("");
+  const [lastNameError, setLastNameError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [termsConditionsError, setTermsConditionsError] = useState("");
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     let hasErrors = false;
 
-    if (username.trim() === "" || username.trim().toLowerCase() === "username" || username.length < 5) {
-      setUsernameError("Please enter a valid Username");
+    // Validations
+    if (firstName.trim() === "" || firstName.length < 2) {
+      setFirstNameError("Please enter a valid first name");
       hasErrors = true;
     } else {
-      setUsernameError("");
+      setFirstNameError("");
+    }
+
+    if (lastName.trim() === "" || lastName.length < 2) {
+      setLastNameError("Please enter a valid last name");
+      hasErrors = true;
+    } else {
+      setLastNameError("");
     }
 
     if (!/\S+@\S+\.\S+/.test(email)) {
-      setEmailError("Please enter a valid Email");
+      setEmailError("Please enter a valid email");
       hasErrors = true;
     } else {
       setEmailError("");
     }
 
     if (password.trim().length < 6) {
-      setPasswordError("Password must be at least 6 characters long");
+      setPasswordError("Password must be at least 6 characters");
       hasErrors = true;
     } else {
       setPasswordError("");
     }
 
     if (!termsConditions) {
-      setTermsConditionsError("You must accept the terms and conditions");
+      setTermsConditionsError("You must accept the terms");
       hasErrors = true;
     } else {
       setTermsConditionsError("");
     }
 
     if (!hasErrors) {
-      alert("Form submitted successfully!");
-      DeleteFields();
+      try {
+        const response = await fetch('/api/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            firstName,
+            lastName,
+            email,
+            password,
+            termsConditions
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Signup failed");
+        }
+
+        alert("Signup successful!");
+        resetFields();
+      } catch (error) {
+        alert(error.message || "An error occurred during signup");
+      }
     }
   }
 
-  function DeleteFields() {
-    setUsername("");
+  function resetFields() {
+    setFirstName("");
+    setLastName("");
     setEmail("");
     setPassword("");
     setTermsConditions(false);
-    setUsernameError("");
+    // Reset errors
+    setFirstNameError("");
+    setLastNameError("");
     setEmailError("");
     setPasswordError("");
     setTermsConditionsError("");
   }
 
   return (
-    <section className={style.login_body}>
-      <div className={style.login_form}>
+    <section className={style.signup_body}>
+      <div className={style.signup_form}>
         <form className={style.form} onSubmit={handleSubmit}>
-        <h1>Task manager</h1>
-          <h1>Welcome!</h1>
-          <h2>Please enter your details</h2>
-          <div className={style.form_username}>
+          <h1>Task Manager</h1>
+          <h2>Ready to start your story?</h2>
+          <p>Sign up and manage your tasks effortlessly</p>
+
+          {/* Name */}
+          <div className={style.form_group}>
             <input
               className={style.form_input}
               type="text"
-              value={username}
+              value={firstName}
               onChange={(e) => {
-                setUsername(e.target.value);
-                setUsernameError("");
+                setFirstName(e.target.value);
+                setFirstNameError("");
               }}
-              placeholder="Enter your username"
+              placeholder="First Name"
             />
-            <br/>
-            {usernameError && <span className={style.login_span}>{usernameError}</span>}
+            {firstNameError && <span className={style.error_message}>{firstNameError}</span>}
           </div>
 
-          <div className={style.form_email}>
+          {/* LastName */}
+          <div className={style.form_group}>
             <input
               className={style.form_input}
               type="text"
+              value={lastName}
+              onChange={(e) => {
+                setLastName(e.target.value);
+                setLastNameError("");
+              }}
+              placeholder="Last Name"
+            />
+            {lastNameError && <span className={style.error_message}>{lastNameError}</span>}
+          </div>
+
+          {/* Email */}
+          <div className={style.form_group}>
+            <input
+              className={style.form_input}
+              type="email"
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
                 setEmailError("");
               }}
-              placeholder="Enter your email"
+              placeholder="Email"
             />
-            <br/>
-            {emailError && <span className={style.login_span}>{emailError}</span>}
+            {emailError && <span className={style.error_message}>{emailError}</span>}
           </div>
 
-          <div className={style.form_password}>
+          {/* Password */}
+          <div className={style.form_group}>
             <input
               className={style.form_input}
               type="password"
@@ -109,14 +163,14 @@ export default function SignUp() {
                 setPassword(e.target.value);
                 setPasswordError("");
               }}
-              placeholder="Enter your password"
+              placeholder="Password"
             />
-            <br/>
-            {passwordError && <span className={style.login_span}>{passwordError}</span>}
+            {passwordError && <span className={style.error_message}>{passwordError}</span>}
           </div>
 
+          {/* Terms and conditions */}
           <div className={style.form_terms}>
-            <label>
+            <label className={style.terms_label}>
               <input
                 type="checkbox"
                 checked={termsConditions}
@@ -124,26 +178,26 @@ export default function SignUp() {
                   setTermsConditions(e.target.checked);
                   setTermsConditionsError("");
                 }}
+                className={style.terms_checkbox}
               />
-              Accept our terms and conditions
+              Accept terms and conditions
             </label>
-            <br/>
-            {termsConditionsError && <span className={style.login_span}>{termsConditionsError}</span>}
-          </div>
-          <div className={style.buttons_login}>
-          <button className={style.submit_button} type="submit">
-            Submit
-          </button>
-
-          <button className={style.delete_button} type="button" onClick={DeleteFields}>
-            Delete
-          </button>
+            {termsConditionsError && <span className={style.error_message}>{termsConditionsError}</span>}
           </div>
 
+          {/* Buttons */}
+          <div className={style.form_buttons}>
+            <button className={style.submit_button} type="submit">
+              Sign Up
+            </button>
+            <button className={style.reset_button} type="button" onClick={resetFields}>
+              Reset
+            </button>
+          </div>
         </form>
       </div>
-      <div className={style.login_image_container}>
-        <img className={style.login_image}src="/images/login_image.jpeg" alt="Login Image" />
+      <div className={style.signup_image_container}>
+        <img className={style.signup_image} src="/images/signup_image.jpeg" alt="Sign Up" />
       </div>
     </section>
   );
