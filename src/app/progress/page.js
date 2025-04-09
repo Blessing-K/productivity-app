@@ -58,7 +58,7 @@ export default function ProgressPage() {
         <h3>Completed Tasks</h3>
         <ul>
           {tasks.filter((t) => t.completed).map((task) => (
-            <li key={task.id}>• {task.name} (✓)</li>
+            <li key={task.id}> {task.name} (✓)</li>
           ))}
         </ul>
       </div>
