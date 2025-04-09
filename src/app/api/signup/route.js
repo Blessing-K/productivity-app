@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import validator from "validator";
 import { PrismaClient } from "@prisma/client";
+import { cookies } from "next/headers";
 import { SignJWT } from "jose";
 
 const prisma = new PrismaClient();
@@ -12,6 +13,8 @@ function getSecretKey() {
 export async function POST(request) {
   try {
     const body = await request.json();
+    console.log("Received signup request:", body);
+
     const { email, password, firstName, lastName } = body;
 
     if (!email || !password || !firstName || !lastName) {
@@ -54,30 +57,33 @@ export async function POST(request) {
 
     const user = await prisma.user.create({
       data: {
-        email,
-        passwordHash,
-        firstName,
-        lastName,
+        email: email,
+        passwordHash: passwordHash,
+        firstName: firstName,
+        lastName: lastName,
       },
     });
 
+ // Generate JWT with jose
     const token = await new SignJWT({ id: user.id })
       .setProtectedHeader({ alg: "HS256" })
       .setIssuedAt()
       .setExpirationTime("1d")
       .sign(getSecretKey());
 
-    // ✅ Manually attach cookie to response header
-    const cookie = `productivity-app=${token}; HttpOnly; Path=/; Max-Age=86400; SameSite=Lax; ${
-      process.env.NODE_ENV === "production" ? "Secure;" : ""
-    }`;
+    // Set token in cookies
+    const cookieStore = cookies();
+    cookieStore.set("productivity-app", token, {
+      httpOnly: true,
+      path: "/",
+      maxAge: 60 * 60 * 24, // 1 day
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    });
 
     return new Response(JSON.stringify({ message: "Signup successful!" }), {
       status: 201,
-      headers: {
-        "Content-Type": "application/json",
-        "Set-Cookie": cookie,
-      },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
     console.error("Signup error:", error);
