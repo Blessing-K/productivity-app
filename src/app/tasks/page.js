@@ -63,6 +63,17 @@ export default function TasksPage() {
     syncTasks(updatedTasks);
   };
 
+  const editTask = (id, newName, newDueDate, newPriority) => {
+    const stored = localStorage.getItem("tasks");
+    const currentTasks = stored ? JSON.parse(stored) : tasks;
+    const updatedTasks = currentTasks.map((task) =>
+      task.id === id
+        ? { ...task, name: newName, dueDate: newDueDate, priority: newPriority }
+        : task
+    );
+    syncTasks(updatedTasks);
+  };
+
   const filteredTasks = tasks.filter((task) => {
     if (filter === "All") return true;
     if (filter === "Pending") return !task.completed;
@@ -130,7 +141,7 @@ export default function TasksPage() {
             key={task.id}
             task={task}
             onToggle={() => toggleTask(task.id)}
-            onEdit={() => alert("Edit coming soon")}
+            onEdit={editTask}
             onDelete={() => deleteTask(task.id)}
           />
         ))}
