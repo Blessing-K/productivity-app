@@ -1,11 +1,31 @@
 "use client";
 
-export default function Progress() {
+import { useState, useEffect } from "react";
+
+export default function ProgressPage() {
+  const [tasks, setTasks] = useState([]);
+
+  useEffect(() => {
+    const loadTasks = () => {
+      const stored = localStorage.getItem("tasks");
+      if (stored) setTasks(JSON.parse(stored));
+    };
+
+    loadTasks();
+    document.addEventListener("visibilitychange", loadTasks);
+
+    return () => {
+      document.removeEventListener("visibilitychange", loadTasks);
+    };
+  }, []);
+
+  const completedCount = tasks.filter((t) => t.completed).length;
+  const totalCount = tasks.length;
+
   return (
     <div style={{ padding: "2rem", maxWidth: "700px", margin: "0 auto" }}>
       <h1>📅 Weekly Progress</h1>
 
-      {/* Week Selector Placeholder */}
       <div style={{ marginBottom: "1rem" }}>
         <label>Select Week: </label>
         <select>
@@ -14,14 +34,12 @@ export default function Progress() {
         </select>
       </div>
 
-      {/* Stats Cards */}
       <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginBottom: "1rem" }}>
-        <div style={cardStyle}>✅ 12/20 Tasks Completed</div>
+        <div style={cardStyle}>✅ {completedCount}/{totalCount} Tasks Completed</div>
         <div style={cardStyle}>🔥 3-day Streak</div>
         <div style={cardStyle}>⏱️ 18h 45m Focus Time</div>
       </div>
 
-      {/* Productivity Graph Placeholder */}
       <div
         style={{
           border: "1px solid #ccc",
@@ -36,20 +54,18 @@ export default function Progress() {
         📈 Productivity Graph (Line chart placeholder)
       </div>
 
-      {/* Completed Tasks */}
       <div style={{ marginBottom: "1rem" }}>
         <h3>Completed Tasks</h3>
         <ul>
-          <li> React app (Mon ✅)</li>
-          <li> Java app (Tue ✅)</li>
-          <li> Python app (Wed ✅)</li>
+          {tasks.filter((t) => t.completed).map((task) => (
+            <li key={task.id}>• {task.name} (✓)</li>
+          ))}
         </ul>
       </div>
 
-      {/* Achievements */}
       <div>
         <h3>🏆 Achievements</h3>
-        <p>3/10 Badges Unlocked</p>
+        <p>{completedCount}/10 Badges Unlocked</p>
       </div>
     </div>
   );
