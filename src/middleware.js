@@ -1,37 +1,42 @@
 import { NextResponse } from "next/server";
-// import jwt from "jsonwebtoken";
+import { jwtVerify } from "jose";
 
-export function middleware(request) {
-    console.log("Middleware is running...");
-
-    // Get the token from cookies
-    const token = request.cookies.get("productivity-app")?.value;
-
-    console.log("Token:", token);
-
-    if (!token) {
-        console.log("No token found, authentication failed.");
-        return NextResponse.redirect(new URL("/login", request.url));
-    }
-    return NextResponse.next();
-    // try {
-    //     // Verify JWT token
-    //     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    //     console.log("Token verified:", decoded);
-    //     // Allow request to proceed
-    //     return NextResponse.next();
-    // } catch (error) {
-    //     console.log("Invalid or expired token:", error.message);
-    //     return NextResponse.redirect(new URL("/login", request.url));
-    // }
+// Helper to get the secret key for jose
+function getSecretKey() {
+  return new TextEncoder().encode(process.env.JWT_SECRET);
 }
 
+// Define public paths that don't require authentication
+const PUBLIC_PATHS = ["/login", "/register", "/api"];
 
-// export const config = {
-//     matcher: "/", 
-// };
-export const config = {
-    matcher: [
-      "/((?!api|_next/static|_next/image|favicon.ico|login|signup).*)",
-    ],
-  };
+export async function middleware(request) {
+  const token = request.cookies.get("productivity-app")?.value;
+  const { pathname } = request.nextUrl;
+
+  const isPublic = PUBLIC_PATHS.some((path) => pathname.startsWith(path));
+  const isLogin = pathname === "/login";
+
+  // Logged in & accessing /login → redirect to home
+  if (token && isLogin) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  // Not logged in & trying to access protected route → redirect to login
+  if (!token && !isPublic) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  // Token exists → verify with jose
+  if (token) {
+    try {
+      await jwtVerify(token, getSecretKey());
+      // You can access decoded payload if needed: const { payload } = await jwtVerify(...)
+    } catch (err) {
+      console.error("Invalid or expired token:", err);
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+  }
+
+  // Allow request to proceed
+  return NextResponse.next();
+}
