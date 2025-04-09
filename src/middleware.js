@@ -7,6 +7,8 @@ export function middleware(request) {
     // Get the token from cookies
     const token = request.cookies.get("productivity-app")?.value;
 
+    console.log("Token:", token);
+
     if (!token) {
         console.log("No token found, authentication failed.");
         return NextResponse.redirect(new URL("/login", request.url));
@@ -24,7 +26,12 @@ export function middleware(request) {
     // }
 }
 
-// Exclude `/api/login` and `/api/signup` from authentication
+
+// export const config = {
+//     matcher: "/", 
+// };
 export const config = {
-    matcher: "/", 
-};
+    matcher: [
+      "/((?!api|_next/static|_next/image|favicon.ico|login|signup).*)",
+    ],
+  };
