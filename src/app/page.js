@@ -6,6 +6,7 @@ import QuoteBanner from "@/src/components/QuoteBanner";
 export default function Home() {
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState("");
+  const [firstName, setFirstName] = useState("")
 
   useEffect(() => {
     const loadTasks = async () => {
@@ -15,7 +16,15 @@ export default function Home() {
       setTasks(tasks)
     };
 
+    const fetchName = async () =>{
+      const response = await fetch("/api/name")
+      const name = await response.json()
+      console.log("Name:", name)
+      setFirstName(name.firstName)
+    }
+
     loadTasks();
+    fetchName();
     document.addEventListener("visibilitychange", loadTasks);
 
     return () => {
@@ -85,7 +94,7 @@ export default function Home() {
     <div
       style={{ textAlign: "center", padding: "2rem", maxWidth: "600px", margin: "0 auto" }}
     >
-      <h1>Hello, [User]!</h1>
+      <h1>Hello, {firstName}!</h1>
 
       <QuoteBanner />
 
