@@ -7,7 +7,7 @@ export default function Navbar() {
   const router = useRouter();
 
   const handleLogout = async () => {
-    const reponse = fetch('/api/logout')
+    const reponse = await fetch('/api/logout')
     router.replace("/login");
   };
 
