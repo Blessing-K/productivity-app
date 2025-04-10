@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import style from "./signup.module.css";
+import { useRouter } from "next/navigation";
 
 export default function SignUp() {
+  const router = useRouter();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -77,8 +79,7 @@ export default function SignUp() {
         if (!response.ok) {
           throw new Error(data.error || "Signup failed");
         }
-        alert("Signup successful!");
-        resetFields();
+        router.push('/');
       } catch (error) {
         alert(error.message || "An error occurred during signup");
       }
