@@ -2,70 +2,112 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import style from "./login.module.css";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
-    setLoading(true);
+    let hasErrors = false;
 
-    try {
-      const response = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+    // Validaciones
+    if (!email) {
+      setEmailError("Email is required");
+      hasErrors = true;
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      setEmailError("Please enter a valid email");
+      hasErrors = true;
+    } else {
+      setEmailError("");
+    }
 
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || "Login failed");
+    if (!password) {
+      setPasswordError("Password is required");
+      hasErrors = true;
+    } else if (password.length < 6) {
+      setPasswordError("Password must be at least 6 characters");
+      hasErrors = true;
+    } else {
+      setPasswordError("");
+    }
+
+    if (!hasErrors) {
+      setLoading(true);
+      try {
+        const response = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.message || "Login failed");
+        }
+
+        router.push("/");
+      } catch (err) {
+        setPasswordError(err.message || "Login failed. Please try again.");
+      } finally {
+        setLoading(false);
       }
-
-      router.push("/");
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-6 bg-white shadow-lg rounded-lg">
-        <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="email"
-            placeholder="Email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-2 border rounded"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-2 border rounded"
-          />
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+    <section className={style.login_body}>
+      <div className={style.login_image_container}>
+      <img className={style.login_image} src="/images/signup_image.jpeg" />
+      </div>
+      <div className={style.login_form}>
+        <form className={style.form} onSubmit={handleSubmit}>
+          <h1>Task Manager</h1>
+          <h2>Welcome back!</h2>
+          <p>Login to continue managing your tasks</p>
+
+          <div className={style.form_group}>
+            <input
+              className={style.form_input}
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setEmailError("");
+              }}
+            />
+            {emailError && <span className={style.error_message}>{emailError}</span>}
+          </div>
+
+          <div className={style.form_group}>
+            <input
+              className={style.form_input}
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setPasswordError("");
+              }}
+            />
+            {passwordError && <span className={style.error_message}>{passwordError}</span>}
+          </div>
+
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+            className={style.submit_button}
             disabled={loading}
           >
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
       </div>
-    </div>
+    </section>
   );
 }
