@@ -52,13 +52,34 @@ export default function TasksPage() {
     setPriority("Low");
   };
 
-  const toggleTask = (id) => {
-    const stored = localStorage.getItem("tasks");
-    const currentTasks = stored ? JSON.parse(stored) : tasks;
-    const updatedTasks = currentTasks.map((task) =>
-      task.id === id ? { ...task, completed: !task.completed } : task
-    );
-    syncTasks(updatedTasks);
+  const toggleTask = async (id) => {
+    const current = tasks.find((task) => task.id === id);
+    if (!current) return;
+  
+    try {
+      const response = await fetch("/api", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          id,
+          completed: !current.completed,
+        }),
+      });
+  
+      const updated = await response.json();
+      if (!response.ok) throw new Error(updated.error || "Failed to toggle task");
+  
+      setTasks((prev) =>
+        prev.map((task) =>
+          task.id === id ? { ...task, completed: updated.completed } : task
+        )
+      );
+    } catch (error) {
+      console.error("Error toggling task:", error);
+    }
   };
 
   const deleteTask = async (id) => {

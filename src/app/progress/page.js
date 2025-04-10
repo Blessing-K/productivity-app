@@ -6,9 +6,11 @@ export default function ProgressPage() {
   const [tasks, setTasks] = useState([]);
 
   useEffect(() => {
-    const loadTasks = () => {
-      const stored = localStorage.getItem("tasks");
-      if (stored) setTasks(JSON.parse(stored));
+    const loadTasks = async () => {
+      const response = await fetch("/api")
+      const tasks = await response.json()
+      console.log(tasks)
+      setTasks(tasks)
     };
 
     loadTasks();
