@@ -90,7 +90,7 @@ export async function PATCH(request){
             completed: completed,
           },
         });
-    
+        console.log("User", userId, "changed task to",completed)
         return new Response(JSON.stringify(updatedTask), {
           status: 200,
           headers: { "Content-Type": "application/json" },
