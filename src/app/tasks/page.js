@@ -11,9 +11,11 @@ export default function TasksPage() {
   const [filter, setFilter] = useState("All");
 
   useEffect(() => {
-    const loadTasks = () => {
-      const stored = localStorage.getItem("tasks");
-      if (stored) setTasks(JSON.parse(stored));
+    const loadTasks = async () => {
+      const response = await fetch("/api")
+      const tasks = await response.json()
+      console.log(tasks)
+      setTasks(tasks)
     };
 
     loadTasks();
@@ -24,24 +26,27 @@ export default function TasksPage() {
     };
   }, []);
 
-  const syncTasks = (updatedTasks) => {
-    setTasks(updatedTasks);
-    localStorage.setItem("tasks", JSON.stringify(updatedTasks));
-  };
-
-  const addTask = () => {
+  const addTask = async () => {
     if (!newTask.trim()) return;
-    const stored = localStorage.getItem("tasks");
-    const currentTasks = stored ? JSON.parse(stored) : [];
-    const newTaskObj = {
-      id: Date.now(),
-      name: newTask,
-      completed: false,
-      dueDate,
-      priority,
-    };
-    const updatedTasks = [...currentTasks, newTaskObj];
-    syncTasks(updatedTasks);
+
+    try {
+      const response = await fetch("/api/tasks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ name: newTask, dueDate: dueDate, priority: priority }),
+      });
+
+      const created = await response.json();
+      if (!response.ok) throw new Error(created.error || "Failed to create task");
+      setTasks((prev) => [...prev, created]);
+      setNewTask("");
+    } catch (error) {
+      console.error("Error adding task:", error);
+    }
+
     setNewTask("");
     setDueDate("");
     setPriority("Low");
@@ -56,22 +61,45 @@ export default function TasksPage() {
     syncTasks(updatedTasks);
   };
 
-  const deleteTask = (id) => {
-    const stored = localStorage.getItem("tasks");
-    const currentTasks = stored ? JSON.parse(stored) : tasks;
-    const updatedTasks = currentTasks.filter((task) => task.id !== id);
-    syncTasks(updatedTasks);
+  const deleteTask = async (id) => {
+    try {
+      const response = await fetch("/api/tasks", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ id }),
+      });
+  
+      if (!response.ok) throw new Error("Failed to delete task");
+      setTasks((prev) => prev.filter((task) => task.id !== id));
+    } catch (error) {
+      console.error("Error deleting task:", error);
+    }
   };
 
-  const editTask = (id, newName, newDueDate, newPriority) => {
-    const stored = localStorage.getItem("tasks");
-    const currentTasks = stored ? JSON.parse(stored) : tasks;
-    const updatedTasks = currentTasks.map((task) =>
-      task.id === id
-        ? { ...task, name: newName, dueDate: newDueDate, priority: newPriority }
-        : task
-    );
-    syncTasks(updatedTasks);
+  const editTask = async (id, newName, newDueDate, newPriority) => {
+    try {
+      const response = await fetch("/api/tasks", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          id,
+          name: newName,
+          dueDate: newDueDate,
+          priority: newPriority,
+        }),
+      });
+  
+      const updated = await response.json();
+      if (!response.ok) throw new Error(updated.error || "Failed to update task");
+  
+      setTasks((prev) =>
+        prev.map((task) => (task.id === id ? updated : task))
+      );
+    } catch (error) {
+      console.error("Error editing task:", error);
+    }
   };
 
   const filteredTasks = tasks.filter((task) => {

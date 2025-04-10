@@ -5,57 +5,83 @@ import { jwtVerify } from "jose";
 const prisma = new PrismaClient();
 
 function getSecretKey() {
-  return new TextEncoder().encode(process.env.JWT_SECRET);
+    return new TextEncoder().encode(process.env.JWT_SECRET);
 }
 
 export async function POST(request) {
-  const cookieStore = cookies();
-  const token = cookieStore.get("productivity-app")?.value;
-
-  if (!token) {
-    return new Response(JSON.stringify({ error: "Not authenticated" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-
-  try {
+    //Post tasks to database
+    const body = await request.json();
+    const { name, dueDate, priority } = body;
+    console.log(name, dueDate, priority)
+    const cookieStore = await cookies(); // This is available inside App Router routes
+    const token = cookieStore.get("productivity-app")?.value;
     const { payload } = await jwtVerify(token, getSecretKey());
     const userId = payload.id;
+    console.log("UserId is", userId)
 
-    if (!userId) {
-      return new Response(JSON.stringify({ error: "Invalid token payload" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+    try {
+        const tasks = await prisma.task.create({
+            data: {
+              name: name, 
+              userId: userId,
+              completed: false,
+              dueDate: new Date(dueDate),
+              priority: priority.toUpperCase()
+            },
+        });
+
+        return new Response(JSON.stringify(tasks), {
+            status: 201,
+            headers: { "Content-Type": "application/json" },
+        });
+    } catch (error) {
+        console.log(error)
+        return new Response(JSON.stringify({ error: "Failed to create tasks" }), {
+            status: 500,
+            headers: { "Content-Type": "application/json" },
+        });
     }
 
-    const body = await request.json();
-    const { task, priority = "MEDIUM", completeBy } = body;
+}
 
-    if (!task || typeof task !== "string") {
-      return new Response(JSON.stringify({ error: "Task content is required" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
+export async function PATCH(request) {
+  const { id, name, completeBy, priority } = await request.json();
 
-    const newTask = await prisma.task.create({
+  try {
+    const updatedTask = await prisma.task.update({
+      where: { id },
       data: {
-        task,
-        priority,
-        completeBy: completeBy ? new Date(completeBy) : null,
-        userId: Number(userId),
+        name,
+        dueDate: completeBy ? new Date(completeBy) : null,
+        priority: priority?.toUpperCase(),
       },
     });
 
-    return new Response(JSON.stringify(newTask), {
-      status: 201,
+    return new Response(JSON.stringify(updatedTask), {
+      status: 200,
       headers: { "Content-Type": "application/json" },
     });
-  } catch (err) {
-    console.error("Error creating task:", err);
-    return new Response(JSON.stringify({ error: "Failed to create task" }), {
+  } catch (error) {
+    console.error("PATCH error:", error);
+    return new Response(JSON.stringify({ error: "Failed to update task" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+}
+
+// DELETE for removing task
+export async function DELETE(request) {
+  const { id } = await request.json();
+  try {
+    await prisma.task.delete({
+      where: { id },
+    });
+
+    return new Response(null, { status: 204 });
+  } catch (error) {
+    console.error("DELETE error:", error);
+    return new Response(JSON.stringify({ error: "Failed to delete task" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });

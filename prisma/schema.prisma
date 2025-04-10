@@ -23,7 +23,7 @@ model Task {
   completed  Boolean  @default(false)
   userId     Int
   priority   Priority? @default(MEDIUM)
-  completeBy DateTime?
+  dueDate DateTime? @map("completedBy")
   user       User     @relation(fields: [userId], references: [id])
 }
 

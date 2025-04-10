@@ -26,7 +26,6 @@ export default function Home() {
 
   const addTask = async () => {
     if (!newTask.trim()) return;
-
     try {
       const response = await fetch("/api", {
         method: "POST",
