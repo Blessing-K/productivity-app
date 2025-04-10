@@ -14,18 +14,18 @@ export async function middleware(request) {
 
   const isPublic = PUBLIC_PATHS.some((path) => pathname.startsWith(path));
   const isLogin = pathname === "/login";
+  const isSignup = pathname ==="/signup"
 
-  // ✅ Redirect logged-in users away from login page
-  if (token && isLogin) {
+  // Redirect logged-in users away from login page
+  if (token && isLogin || token && isSignup) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // ✅ If no token and route is not public → redirect to login
-  if (!token && !isPublic) {
+  // If no token and route is not public → redirect to login
+  if (!token && !isPublic && !isSignup) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
-
-  // ✅ If token exists → verify it
+  // If token exists → verify it
   if (token) {
     try {
       await jwtVerify(token, getSecretKey());
