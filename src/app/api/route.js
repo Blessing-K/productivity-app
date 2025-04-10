@@ -69,3 +69,38 @@ export async function POST(request) {
     }
 
 }
+
+export async function PATCH(request){
+    const body = await request.json();
+    const { id, completed } = body;
+    const cookieStore = await cookies(); // This is available inside App Router routes
+    const token = cookieStore.get("productivity-app")?.value;
+    const { payload } = await jwtVerify(token, getSecretKey());
+    const userId = payload.id;
+    console.log("UserId is", userId)
+
+    try {
+        console.log("updating tasks")
+        const updatedTask = await prisma.task.update({
+          where: { 
+            id: id,
+            userId: userId
+          },
+          data: {
+            completed: completed,
+          },
+        });
+    
+        return new Response(JSON.stringify(updatedTask), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      } catch (error) {
+        console.error("PATCH error:", error);
+        return new Response(JSON.stringify({ error: "Failed to update task" }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+}
