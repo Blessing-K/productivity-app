@@ -1,8 +1,6 @@
 import { SignJWT } from "jose";
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
-import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 
 // Initialize Prisma Client
 const prisma = new PrismaClient();

@@ -72,19 +72,15 @@ export async function POST(request) {
       .sign(getSecretKey());
 
     // Set token in cookies
-    const cookieStore = cookies();
-    cookieStore.set("productivity-app", token, {
-      httpOnly: true,
-      path: "/",
-      maxAge: 60 * 60 * 24, // 1 day
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-    });
 
     return new Response(JSON.stringify({ message: "Signup successful!" }), {
       status: 201,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Set-Cookie": `productivity-app=${token}; HttpOnly; Path=/; Max-Age=86400; SameSite=Lax; Secure`,
+      },
     });
+
   } catch (error) {
     console.error("Signup error:", error);
 

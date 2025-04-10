@@ -77,7 +77,6 @@ export default function SignUp() {
         if (!response.ok) {
           throw new Error(data.error || "Signup failed");
         }
-
         alert("Signup successful!");
         resetFields();
       } catch (error) {

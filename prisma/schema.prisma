@@ -1,18 +1,34 @@
-// This is your Prisma schema file,
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
+generator client {
+  provider = "prisma-client-js"
+}
+
 model User {
-  id      Int      @id @default(autoincrement())
-  email   String   @unique
-  firstName String
-  lastName String
+  id           Int    @id @default(autoincrement())
+  email        String @unique
+  firstName    String
+  lastName     String
   passwordHash String
+  tasks        Task[]
+}
+
+model Task {
+  id         Int      @id @default(autoincrement())
+  name       String @map("task")
+  completed  Boolean  @default(false)
+  userId     Int
+  priority   Priority? @default(MEDIUM)
+  completeBy DateTime?
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+enum Priority {
+  HIGH
+  MEDIUM
+  LOW
 }

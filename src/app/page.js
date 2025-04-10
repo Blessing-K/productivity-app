@@ -8,9 +8,12 @@ export default function Home() {
   const [newTask, setNewTask] = useState("");
 
   useEffect(() => {
-    const loadTasks = () => {
-      const stored = localStorage.getItem("tasks");
-      if (stored) setTasks(JSON.parse(stored));
+
+    const loadTasks = async () => {
+      const response = await fetch("/api")
+      const tasks = await response.json()
+      console.log(tasks)
+      setTasks(tasks)
     };
 
     loadTasks();
@@ -21,23 +24,28 @@ export default function Home() {
     };
   }, []);
 
-  const syncTasks = (updatedTasks) => {
-    setTasks(updatedTasks);
-    localStorage.setItem("tasks", JSON.stringify(updatedTasks));
-  };
-
-  const addTask = () => {
+  const addTask = async () => {
     if (!newTask.trim()) return;
-    const stored = localStorage.getItem("tasks");
-    const currentTasks = stored ? JSON.parse(stored) : [];
-    const newTaskObj = {
-      id: Date.now(),
-      name: newTask,
-      completed: false,
-    };
-    const updatedTasks = [...currentTasks, newTaskObj];
-    syncTasks(updatedTasks);
-    setNewTask("");
+
+    try {
+      const response = await fetch("/api", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ name: newTask }),
+      });
+
+      const created = await response.json();
+
+      if (!response.ok) throw new Error(created.error || "Failed to create task");
+
+      setTasks((prev) => [...prev, created]);
+      setNewTask("");
+    } catch (error) {
+      console.error("Error adding task:", error);
+    }
   };
 
   const toggleTask = (id) => {
