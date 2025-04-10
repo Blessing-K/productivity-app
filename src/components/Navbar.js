@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 export default function Navbar() {
   const router = useRouter();
 
-  const handleLogout = () => {
-    localStorage.clear();
+  const handleLogout = async () => {
+    const reponse = fetch('/api/logout')
     router.replace("/login");
   };
 
