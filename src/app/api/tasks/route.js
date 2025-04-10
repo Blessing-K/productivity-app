@@ -45,14 +45,14 @@ export async function POST(request) {
 }
 
 export async function PATCH(request) {
-  const { id, name, completeBy, priority } = await request.json();
+  const { id, name, dueDate, priority } = await request.json();
 
   try {
     const updatedTask = await prisma.task.update({
       where: { id },
       data: {
         name,
-        dueDate: completeBy ? new Date(completeBy) : null,
+        dueDate: dueDate ? new Date(dueDate) : null,
         priority: priority?.toUpperCase(),
       },
     });
