@@ -63,7 +63,7 @@ export default function LoginPage() {
   return (
     <section className={style.login_body}>
       <div className={style.login_image_container}>
-        <img className={style.login_image} src="/images/signup_image.jpeg" />
+        <img className={style.login_image} src="https://i.imgur.com/0XddD4i.png" />
       </div>
       <div className={style.login_form}>
         <form className={style.form} onSubmit={handleSubmit}>
