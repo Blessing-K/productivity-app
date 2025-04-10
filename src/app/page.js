@@ -11,7 +11,7 @@ export default function Home() {
     const loadTasks = async () => {
       const response = await fetch("/api")
       const tasks = await response.json()
-      console.log("Data from API:", data);
+      console.log("Data from API:", tasks);
       setTasks(tasks)
     };
 
