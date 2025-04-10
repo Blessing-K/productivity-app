@@ -106,6 +106,10 @@ export default function LoginPage() {
           >
             {loading ? "Logging in..." : "Login"}
           </button>
+          <p className={style.signup_redirect}>
+            Do not have an account?{" "}
+            <a href="/signup" className={style.signup_link}>Sign up here</a>
+          </p>
         </form>
       </div>
     </section>
