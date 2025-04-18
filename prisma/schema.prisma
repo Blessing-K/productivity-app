@@ -24,6 +24,7 @@ model Task {
   userId     Int
   priority   Priority? @default(MEDIUM)
   dueDate DateTime? @map("completedBy")
+  createdAt  DateTime  @default(now())
   user       User     @relation(fields: [userId], references: [id])
 }
 

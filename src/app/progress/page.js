@@ -36,10 +36,8 @@ export default function ProgressPage() {
         </select>
       </div>
 
-      <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginBottom: "1rem" }}>
+      <div style={{ marginBottom: "1rem" }}>
         <div style={cardStyle}>✅ {completedCount}/{totalCount} Tasks Completed</div>
-        <div style={cardStyle}>🔥 3-day Streak</div>
-        <div style={cardStyle}>⏱️ 18h 45m Focus Time</div>
       </div>
 
       <div

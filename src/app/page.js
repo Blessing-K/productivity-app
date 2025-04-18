@@ -1,7 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import QuoteBanner from "@/src/components/QuoteBanner";
+import { useState, useEffect, useMemo } from "react";
+import dynamic from "next/dynamic";
+
+const QuoteBanner = dynamic(() => import("@/src/components/QuoteBanner"), {
+  loading: () => <p style={{ fontStyle: "italic", color: "gray" }}>Loading motivation...</p>,
+  ssr: false,
+});
 
 export default function Home() {
   const [tasks, setTasks] = useState([]);
@@ -85,10 +90,10 @@ export default function Home() {
     }
   };
 
-  const completedTasks = tasks.filter((task) => task.completed).length;
-  const totalTasks = tasks.length;
-  const completionRate =
-    totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  const completedTasks = useMemo(() => tasks.filter((task) => task.completed).length, [tasks]);
+  const totalTasks = useMemo(() => tasks.length, [tasks]);
+  const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
 
   return (
     <div
