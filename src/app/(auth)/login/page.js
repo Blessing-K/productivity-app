@@ -16,7 +16,7 @@ export default function LoginPage() {
     e.preventDefault();
     let hasErrors = false;
 
-    // Validaciones
+    // Validations
     if (!email) {
       setEmailError("Email is required");
       hasErrors = true;
