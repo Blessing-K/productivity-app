@@ -11,22 +11,23 @@ const QuoteBanner = dynamic(() => import("@/src/components/QuoteBanner"), {
 export default function Home() {
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState("");
-  const [firstName, setFirstName] = useState("")
+  const [firstName, setFirstName] = useState("");
+  const [showAll, setShowAll] = useState(false); // 👈 Toggle state
 
   useEffect(() => {
     const loadTasks = async () => {
-      const response = await fetch("/api")
-      const tasks = await response.json()
+      const response = await fetch("/api");
+      const tasks = await response.json();
       console.log("Data from API:", tasks);
-      setTasks(tasks)
+      setTasks(tasks);
     };
 
-    const fetchName = async () =>{
-      const response = await fetch("/api/name")
-      const name = await response.json()
-      console.log("Name:", name)
-      setFirstName(name.firstName)
-    }
+    const fetchName = async () => {
+      const response = await fetch("/api/name");
+      const name = await response.json();
+      console.log("Name:", name);
+      setFirstName(name.firstName);
+    };
 
     loadTasks();
     fetchName();
@@ -50,7 +51,6 @@ export default function Home() {
       });
 
       const created = await response.json();
-
       if (!response.ok) throw new Error(created.error || "Failed to create task");
 
       setTasks((prev) => [...prev, created]);
@@ -63,27 +63,20 @@ export default function Home() {
   const toggleTask = async (id) => {
     const current = tasks.find((task) => task.id === id);
     if (!current) return;
-  
+
     try {
       const response = await fetch("/api", {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({
-          id,
-          completed: !current.completed,
-        }),
+        body: JSON.stringify({ id, completed: !current.completed }),
       });
-  
+
       const updated = await response.json();
       if (!response.ok) throw new Error(updated.error || "Failed to toggle task");
-  
+
       setTasks((prev) =>
-        prev.map((task) =>
-          task.id === id ? { ...task, completed: updated.completed } : task
-        )
+        prev.map((task) => (task.id === id ? { ...task, completed: updated.completed } : task))
       );
     } catch (error) {
       console.error("Error toggling task:", error);
@@ -94,11 +87,8 @@ export default function Home() {
   const totalTasks = useMemo(() => tasks.length, [tasks]);
   const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
-
   return (
-    <div
-      style={{ textAlign: "center", padding: "2rem", maxWidth: "600px", margin: "0 auto" }}
-    >
+    <div style={{ textAlign: "center", padding: "2rem", maxWidth: "600px", margin: "0 auto" }}>
       <h1>Hello, {firstName}!</h1>
 
       <QuoteBanner />
@@ -106,7 +96,7 @@ export default function Home() {
       <div style={{ marginTop: "2rem", textAlign: "left" }}>
         <h2>📝 Tasks & Goals</h2>
         <ul style={{ listStyleType: "none", padding: 0 }}>
-          {tasks.slice(0, 3).map((task) => (
+          {(showAll ? tasks : tasks.slice(0, 3)).map((task) => (
             <li key={task.id} style={{ marginBottom: "0.5rem" }}>
               <input
                 type="checkbox"
@@ -124,6 +114,22 @@ export default function Home() {
             </li>
           ))}
         </ul>
+
+        {tasks.length > 3 && (
+          <button
+            onClick={() => setShowAll((prev) => !prev)}
+            style={{
+              marginTop: "0.5rem",
+              background: "none",
+              border: "none",
+              color: "#0070f3",
+              cursor: "pointer",
+              fontWeight: "bold",
+            }}
+          >
+            {showAll ? "Show Less" : "Show All"}
+          </button>
+        )}
 
         <div style={{ marginTop: "1rem" }}>
           <input
@@ -165,8 +171,7 @@ export default function Home() {
       >
         <h3>📊 Progress Summary</h3>
         <p>
-          {completionRate}% Completed | {totalTasks - completedTasks} Task(s)
-          Pending
+          {completionRate}% Completed | {totalTasks - completedTasks} Task(s) Pending
         </p>
       </div>
     </div>
